@@ -46,7 +46,8 @@ $files = get-childitem C:\
 foreach ($file in $files){
     try {
         get-childitem "C:\$file" -include *.ps1,*.bat,*.com,*.vbs,*.txt,*.html,*.conf,*.rdp,.*inf -recurse -EA SilentlyContinue | get-acl -EA SilentlyContinue | select path -expand access | 
-        where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|EVERYONE|CREATOR OWNER|NT SERVICE"} | where {$_.filesystemrights -match "FullControl|Modify"} | ft @{Label="";Expression={Convert-Path $_.Path}} | ft | out-string
+        where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|EVERYONE|CREATOR OWNER|NT SERVICE"} | where {$_.filesystemrights -match "FullControl|Modify"} | 
+        ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize
         }
     catch {
         write "Failed to read more files"
@@ -59,7 +60,9 @@ write-host "--------------------------------------------------------------------
 $folders = get-childitem C:\
 foreach ($folder in $folders){
     try {
-        Get-ChildItem -Recurse "C:\$folder" | ?{ $_.PSIsContainer} | get-acl  | select path -expand access |  where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|CREATOR OWNER|NT SERVICE"}  | where {$_.filesystemrights -match "FullControl|Modify"} | select path,filesystemrights,IdentityReference |  ft @{Label="";Expression={Convert-Path $_.Path}}
+        Get-ChildItem -Recurse "C:\$folder" -EA SilentlyContinue | ?{ $_.PSIsContainer} | get-acl  | select path -expand access |  
+        where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|CREATOR OWNER|NT SERVICE"}  | where {$_.filesystemrights -match "FullControl|Modify"} | 
+        select path,filesystemrights,IdentityReference |  ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize
          }
     catch {
         write "Failed to read more folders"
@@ -130,5 +133,22 @@ foreach ($service in $services) {
      }
 }
 write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Scheduled Tasks                                "
+write-host "					Custom Scheduled Tasks                                "
 write-host "-------------------------------------------------------------------------------------------------"
+#Stolen from https://serverfault.com/questions/604673/how-to-print-out-information-about-task-scheduler-in-powershell-script
+$sched = New-Object -Com "Schedule.Service"
+$sched.Connect()
+$out = @()
+$sched.GetFolder("\").GetTasks(0) | % {
+    $xml = [xml]$_.xml
+    $out += New-Object psobject -Property @{
+        "Name" = $_.Name
+        "Status" = switch($_.State) {0 {"Unknown"} 1 {"Disabled"} 2 {"Queued"} 3 {"Ready"} 4 {"Running"}}
+        "NextRunTime" = $_.NextRunTime
+        "LastRunTime" = $_.LastRunTime
+        "LastRunResult" = $_.LastTaskResult
+        "Author" = $xml.Task.Principals.Principal.UserId
+        "Created" = $xml.Task.RegistrationInfo.Date
+    }
+}
+write-host $out 
