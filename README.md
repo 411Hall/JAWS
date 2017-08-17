@@ -1,6 +1,8 @@
-# JAWS - Just Another Windows (Enum) Scrip
+# JAWS - Just Another Windows (Enum) Script
 
-Simple script for decoding malicious VBS scripts dropped by Word macros.
+JAWS is PowerShell script designed to help Penetration Testers quickly identify potential privilege escalation vectors on Windows systems. 
+
+Its recommended you use the pre compiled standalone binary or compile the script yourself using the [PS2EXE tool] (https://gallery.technet.microsoft.com/PS2EXE-Convert-PowerShell-9e4e07f1)
 
 ## Usage:
 
@@ -12,3 +14,5 @@ Standalone Exe
 C:\> jaws-enum.exe
 
 ```
+
+Currently the output to screen is a bit messy, its recommended you dump into a text file for now.
