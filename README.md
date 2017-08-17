@@ -16,3 +16,12 @@ C:\> jaws-enum.exe
 ```
 
 Currently the output to screen is a bit messy, its recommended you dump into a text file for now.
+
+
+## To Do:
+  - Add file search for common strings (password, keys etc.)
+  - Add last 25 modified files
+  - Add full directory listing with user defined depth
+  - Add CMD line switches
+  - Read SAM file permissions
+  - Improve output
