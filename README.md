@@ -2,7 +2,7 @@
 
 JAWS is PowerShell script designed to help Penetration Testers quickly identify potential privilege escalation vectors on Windows systems. 
 
-Its recommended you use the pre compiled standalone binary or compile the script yourself using the [PS2EXE tool] (https://gallery.technet.microsoft.com/PS2EXE-Convert-PowerShell-9e4e07f1)
+Its recommended you use the pre compiled standalone binary or compile the script yourself using the [PS2EXE tool](https://gallery.technet.microsoft.com/PS2EXE-Convert-PowerShell-9e4e07f1)
 
 ## Usage:
 
