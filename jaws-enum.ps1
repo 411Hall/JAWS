@@ -97,7 +97,7 @@ write-host "--------------------------------------------------------------------
 $files = get-childitem C:\
 foreach ($file in $files){
     try {
-        get-childitem "C:\$file" -include *.ps1,*.bat,*.com,*.vbs,*.txt,*.html,*.conf,*.rdp,.*inf -recurse -EA SilentlyContinue | get-acl -EA SilentlyContinue | select path -expand access | 
+        get-childitem "C:\$file" -include *.ps1,*.bat,*.com,*.vbs,*.txt,*.html,*.conf,*.rdp,.*inf,*.ini -recurse -EA SilentlyContinue | get-acl -EA SilentlyContinue | select path -expand access | 
         where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|EVERYONE|CREATOR OWNER|NT SERVICE"} | where {$_.filesystemrights -match "FullControl|Modify"} | 
         ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096
         }
@@ -150,14 +150,19 @@ get-childitem C:\ -recurse -include $files -EA SilentlyContinue  | Select-String
 write-host "`n-------------------------------------------------------------------------------------------------"
 write-host "				   AlwaysInstallElevated RegistryKey                                      "
 write-host "-------------------------------------------------------------------------------------------------" 
-$HKLM = get-childitem "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" -EA SilentlyContinue
-if ($HKLM -eq $null) {
+$HKLM = test-path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
+$HKCU = test-path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer"
+if ($HKLM -eq $True) {
     write "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer Key Exists!"
-    }
-$HKCU = get-childitem "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer"  -EA SilentlyContinue
-if ($HKLM -ne $null) {
-    write "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer Key Exists!"
-    }
+}
+if ($HKCU -eq $True) {
+    write "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer Key Exists!"
+}
+
+write-host "`n-------------------------------------------------------------------------------------------------"
+write-host "					Stored Credentials                                       "
+write-host "-------------------------------------------------------------------------------------------------"
+cmdkey /list
 
 
 write-host "`n-------------------------------------------------------------------------------------------------"
@@ -170,6 +175,14 @@ write-host "`n------------------------------------------------------------------
 write-host "					Installed Pacthes                                  "
 write-host "-------------------------------------------------------------------------------------------------"
 Get-Wmiobject -class Win32_QuickFixEngineering -namespace "root\cimv2" | select HotFixID, InstalledOn| ft -autosize | out-string 
+
+
+write-host "`n-------------------------------------------------------------------------------------------------"
+write-host "				   Programs Folders                                      "
+write-host "-------------------------------------------------------------------------------------------------" 
+$prog_folders = get-childitem "C:\Program Files"  -EA SilentlyContinue  | select Name
+$prog_folders += get-childitem "C:\Program Files (x86)"  -EA SilentlyContinue  | select Name
+write $prog_folders | ft -hidetableheaders -autosize| out-string
 
 
 write-host "`n-------------------------------------------------------------------------------------------------"
