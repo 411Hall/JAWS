@@ -17,7 +17,7 @@ C:\> jaws-enum.exe
 
 Currently the output is a bit messy, its recommended you dump into a text file for now.
 
-## Curremt Features
+## Current Features
   - Network Information (interfaces, arp, netstat)
   - Firewall Status and Rules
   - Running Processes
