@@ -50,7 +50,7 @@ write-host "					FireWall Rules                                       "
 write-host "-------------------------------------------------------------------------------------------------"
 Function Get-FireWallRule
 {Param ($Name, $Direction, $Enabled, $Protocol, $profile, $action, $grouping)
-$Rules=(New-object –comObject HNetCfg.FwPolicy2).rules
+$Rules=(New-object -comObject HNetCfg.FwPolicy2).rules
 If ($name)      {$rules= $rules | where-object {$_.name     -like $name}}
 If ($direction) {$rules= $rules | where-object {$_.direction  -eq $direction}}
 If ($Enabled)   {$rules= $rules | where-object {$_.Enabled    -eq $Enabled}}
@@ -60,7 +60,7 @@ If ($Action)    {$rules= $rules | where-object {$_.Action     -eq $Action}}
 If ($Grouping)  {$rules= $rules | where-object {$_.Grouping -like $Grouping}}
 $rules}
 Get-firewallRule -enabled $true | sort direction,applicationName,name |
-format-table -wrap -autosize -property Name, @{Label=”Action”; expression={$Fwaction[$_.action]}},
+format-table -wrap -autosize -property Name, @{Label=Action; expression={$Fwaction[$_.action]}},
 @{label="Direction";expression={ $fwdirection[$_.direction]}},
 @{Label="Protocol"; expression={$FwProtocols[$_.protocol]}} , localPorts,applicationname | out-string -Width 4096
 
@@ -194,7 +194,7 @@ foreach ($service in $services) {
     $path=$Service.Pathname
     if (-not( test-path $path -ea silentlycontinue)) {
         if ($Service.Pathname -match "(\""([^\""]+)\"")|((^[^\s]+)\s)|(^[^\s]+$)") {
-            $path = $matches[0] –replace """",""
+            $path = $matches[0] -replace """",""
         }
     }
     if (test-path "$path") {
