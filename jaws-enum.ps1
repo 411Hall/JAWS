@@ -1,5 +1,5 @@
 write-host "#################################################################################################"
-write-host "## 			   J.A.W.S. (Just Another Windows Enum Script                              ##"
+write-host "## 			 J.A.W.S. (Just Another Windows Enum Script                            ##"
 write-host "##                                                                                             ##"
 write-host "##                        https://github.com/James-Hall/JAWS                                   ##"
 write-host "##                                                                                             ##"
@@ -43,7 +43,7 @@ if ($FireProfile.FirewallEnabled -eq $False) {
     write "Firwall is Enabled"
     }
 
-
+	
 # Stolen from https://blogs.technet.microsoft.com/jamesone/2009/02/17/how-to-manage-the-windows-firewall-settings-with-powershell/
 write-host "`n-------------------------------------------------------------------------------------------------"
 write-host "					FireWall Rules                                       "
@@ -59,10 +59,7 @@ If ($profile)   {$rules= $rules | where-object {$_.Profiles -bAND $profile}}
 If ($Action)    {$rules= $rules | where-object {$_.Action     -eq $Action}}
 If ($Grouping)  {$rules= $rules | where-object {$_.Grouping -like $Grouping}}
 $rules}
-Get-firewallRule -enabled $true | sort direction,applicationName,name |
-format-table -wrap -autosize -property Name, @{Label=Action; expression={$Fwaction[$_.action]}},
-@{label="Direction";expression={ $fwdirection[$_.direction]}},
-@{Label="Protocol"; expression={$FwProtocols[$_.protocol]}} , localPorts,applicationname | out-string -Width 4096
+Get-firewallRule -enabled $true | sort direction,applicationName,name | format-table -property Name , localPorts,applicationname
 
 
 write-host "`n-------------------------------------------------------------------------------------------------"
@@ -88,7 +85,7 @@ $adsi.Children | where {$_.SchemaClassName -eq 'user'} | Foreach-Object {
 write-host "`n-------------------------------------------------------------------------------------------------"
 write-host "					Processes                                       "
 write-host "-------------------------------------------------------------------------------------------------"
-Get-WmiObject win32_process | Select-Object Name,ProcessID,@{n='Owner';e={$_.GetOwner().User}},CommandLine | sort name | format-table -wrap -autosize | out-string -Width 4096
+Get-WmiObject win32_process | Select-Object Name,ProcessID,@{n='Owner';e={$_.GetOwner().User}},CommandLine | sort name | format-table -wrap -autosize 
 
 
 write-host "`n-------------------------------------------------------------------------------------------------"
@@ -105,7 +102,8 @@ foreach ($file in $files){
         write "Failed to read more files"
     }
     }
-    
+  
+ 
 write-host "`n-------------------------------------------------------------------------------------------------"
 write-host "				   Folders with Full Control and Modify Access                                       "
 write-host "-------------------------------------------------------------------------------------------------"
@@ -120,7 +118,7 @@ foreach ($folder in $folders){
         write "Failed to read more folders"
     }
     }
-    
+
 
 write-host "`n-------------------------------------------------------------------------------------------------"
 write-host "					Mapped Drives                                    "
@@ -176,48 +174,12 @@ write-host "					Installed Pacthes                                  "
 write-host "-------------------------------------------------------------------------------------------------"
 Get-Wmiobject -class Win32_QuickFixEngineering -namespace "root\cimv2" | select HotFixID, InstalledOn| ft -autosize | out-string 
 
-
 write-host "`n-------------------------------------------------------------------------------------------------"
 write-host "				   Programs Folders                                      "
 write-host "-------------------------------------------------------------------------------------------------" 
 $prog_folders = get-childitem "C:\Program Files"  -EA SilentlyContinue  | select Name
 $prog_folders += get-childitem "C:\Program Files (x86)"  -EA SilentlyContinue  | select Name
 write $prog_folders | ft -hidetableheaders -autosize| out-string
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Potentially Vulnerable Services                                "
-write-host "-------------------------------------------------------------------------------------------------"
-#Stolen from https://helvick.blogspot.co.uk/2007/08/checking-service-permissions-with.html
-$services = get-wmiobject -query 'select * from win32_service'
-foreach ($service in $services) {
-    $path=$Service.Pathname
-    if (-not( test-path $path -ea silentlycontinue)) {
-        if ($Service.Pathname -match "(\""([^\""]+)\"")|((^[^\s]+)\s)|(^[^\s]+$)") {
-            $path = $matches[0] -replace """",""
-        }
-    }
-    if (test-path "$path") {
-        $ServiceName = $service.Displayname
-        $secure=get-acl $path
-        foreach ($item in $secure.Access) {
-            if ( ($item.IdentityReference -match "NT AUTHORITY\\SYSTEM"   ) -or
-                 ($item.IdentityReference -match "NT AUTHORITY\\NETWORK"  ) -or
-                 ($item.IdentityReference -match "BUILTIN\\Administrators") -or
-                 ($item.IdentityReference -match "NT SERVICE\\TrustedInstaller") -or
-                ($item.IdentityReference -match "BUILTIN\\Power Users"   ) ) {
-            } else {         
-                if ($item.FileSystemRights.tostring() -match "Modify|Full|Change") {
-                    write-host "------------"
-                    write-host $ServiceName 
-                    write-host $item.IdentityReference.value 
-                    write-host $item.AccessControlType.tostring() $item.FileSystemRights.tostring()
-                }
-            }
-        }
-     }
-}
-
 
 write-host "`n-------------------------------------------------------------------------------------------------"
 write-host "				   MuiCache Files                                       "
@@ -229,9 +191,8 @@ get-childitem "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\
    }
 }
 
-
 write-host "`n-------------------------------------------------------------------------------------------------"
 write-host "				  Scheduled Tasks                                "
 write-host "-------------------------------------------------------------------------------------------------"
 write-host "Current System Time: " $date.ToShortTimeString()
-schtasks /query /FO CSV /v | convertfrom-csv | where { $_.TaskName -ne "TaskName" } | select { $_.TaskName.Split('\') | select -last 1 },"Run As User", "Task to Run", "Next Run Time" | ft -autosize | out-string -Width 5096
+schtasks /query /FO CSV /v | convertfrom-csv | where { $_.TaskName -ne "TaskName" } | select "TaskName","Run As User", "Task to Run"  | fl
