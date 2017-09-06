@@ -2,20 +2,13 @@
 
 JAWS is PowerShell script designed to help Penetration Testers quickly identify potential privilege escalation vectors on Windows systems. It is written using PowerShell 2.0 so is designed to work on as many operating systems as possible. It has currently been tested on Windows 7 and Windows 10.
 
-Its recommended you use the pre compiled standalone binary or compile the script yourself using the [PS2EXE tool](https://gallery.technet.microsoft.com/PS2EXE-Convert-PowerShell-9e4e07f1)
-
 ## Usage:
 
 ```
 Powershell Script
-C:\> powershell.exe -ExecutionPolicy Bypass -file C:\jaws-enum.ps1
-
-Standalone Exe
-C:\> jaws-enum.exe
+C:\>powershell.exe -ExecutionPolicy Bypass -C Invoke-Expression .\jaws-enum.ps1
 
 ```
-
-Currently the output is a bit messy, its recommended you dump into a text file for now.
 
 ## Current Features
   - Network Information (interfaces, arp, netstat)
