@@ -6,7 +6,7 @@ JAWS is PowerShell script designed to help Penetration Testers quickly identify 
 
 ```
 Powershell Script
-C:\>powershell.exe -ExecutionPolicy Bypass -C Invoke-Expression .\jaws-enum.ps1
+PS C:\>Invoke-Expression .\jaws-enum.ps1
 
 ```
 
