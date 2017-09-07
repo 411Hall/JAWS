@@ -1,53 +1,50 @@
-write-host "#################################################################################################"
-write-host "## 			 J.A.W.S. (Just Another Windows Enum Script                            ##"
-write-host "##                                                                                             ##"
-write-host "##                        https://github.com/James-Hall/JAWS                                   ##"
-write-host "##                                                                                             ##"
-write-host "#################################################################################################"
-write-host "`n"
-$win_version = Get-WmiObject -class Win32_OperatingSystem
-write-host "Windows Version: "$win_version.caption$win_version.version
-write-host "Architecture: "$env:processor_architecture
-write-host "Hostname: " $env:ComputerName
-write-host "Current User: " $env:username
-$date = get-date
-write-host "Current Time\Date: " $date
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Network Information                                       "
-write-host "-------------------------------------------------------------------------------------------------"
-Get-WmiObject Win32_NetworkAdapterConfiguration -filter 'IPEnabled= True' | select IpAddress, DNSDomain, DefaultIPGateway | ft -hidetableheaders -autosize | out-string -Width 4096
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Arp                                       "
-write-host "-------------------------------------------------------------------------------------------------"
-arp -a
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					NetStat                                       "
-write-host "-------------------------------------------------------------------------------------------------"
-netstat -ano
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Firewall Status                                       "
-write-host "-------------------------------------------------------------------------------------------------"
+$output = "" 
+$output = $output +  "############################################################`r`n"
+$output = $output +  "##     J.A.W.S. (Just Another Windows Enum Script)        ##`r`n"
+$output = $output +  "##                                                        ##`r`n"
+$output = $output +  "##         https://github.com/James-Hall/JAWS             ##`r`n"
+$output = $output +  "##                                                        ##`r`n"
+$output = $output +  "############################################################`r`n"
+$output = $output +  "`r`n"
+$win_version = (Get-WmiObject -class Win32_OperatingSystem)
+$output = $output +  "Windows Version: " + (($win_version.caption -join $win_version.version) + "`r`n")
+$output = $output +  "Architecture: " + (($env:processor_architecture) + "`r`n")
+$output = $output +  "Hostname: " + (($env:ComputerName) + "`r`n")
+$output = $output +  "Current User: " + (($env:username) + "`r`n")
+$output = $output +  "Current Time\Date: " + (get-date)
+$output = $output +  "`r`n"
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Network Information`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output + (Get-WmiObject Win32_NetworkAdapterConfiguration -filter 'IPEnabled= True' | select IpAddress, DNSDomain, DefaultIPGateway | ft -hidetableheaders -autosize | out-string -Width 4096)
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Arp`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output + (arp -a | out-string) 
+$output = $output +  "`r`n"
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " NetStat`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output + (netstat -ano | out-string)
+$output = $output +  "`r`n"
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Firewall Status`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  "`r`n"
 $Firewall = New-Object -com HNetCfg.FwMgr
 $FireProfile = $Firewall.LocalPolicy.CurrentProfile  
 if ($FireProfile.FirewallEnabled -eq $False) {
-    write "Firewall is Disabled"
+    $output = $output +  ("Firewall is Disabled" + "`r`n")
     } else {
-    write "Firwall is Enabled"
+    $output = $output +  ("Firwall is Enabled" + "`r`n")
     }
-
-	
-# Stolen from https://blogs.technet.microsoft.com/jamesone/2009/02/17/how-to-manage-the-windows-firewall-settings-with-powershell/
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					FireWall Rules                                       "
-write-host "-------------------------------------------------------------------------------------------------"
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " FireWall Rules`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
 Function Get-FireWallRule
 {Param ($Name, $Direction, $Enabled, $Protocol, $profile, $action, $grouping)
 $Rules=(New-object -comObject HNetCfg.FwPolicy2).rules
@@ -59,140 +56,127 @@ If ($profile)   {$rules= $rules | where-object {$_.Profiles -bAND $profile}}
 If ($Action)    {$rules= $rules | where-object {$_.Action     -eq $Action}}
 If ($Grouping)  {$rules= $rules | where-object {$_.Grouping -like $Grouping}}
 $rules}
-Get-firewallRule -enabled $true | sort direction,applicationName,name | format-table -property Name , localPorts,applicationname
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Hosts File Content                                       "
-write-host "-------------------------------------------------------------------------------------------------"
-$hostsPath = "$env:windir\System32\drivers\etc\hosts"
-$hosts = get-content $hostsPath
-write $hosts 
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Users                                       "
-write-host "-------------------------------------------------------------------------------------------------"
+$output = $output +  (Get-firewallRule -enabled $true | sort direction,applicationName,name | format-table -property Name , localPorts,applicationname | out-string)
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Hosts File Content`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  "`r`n"
+$output = $output + ((get-content $env:windir\System32\drivers\etc\hosts | out-string) + "`r`n")
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Users`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
 $adsi = [ADSI]"WinNT://$env:COMPUTERNAME"
 $adsi.Children | where {$_.SchemaClassName -eq 'user'} | Foreach-Object {
     $groups = $_.Groups() | Foreach-Object {$_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)}
-    write-host "----------"
-    write-host "Username: " $_.Name 
-    write-host "Groups:   " $groups
+    $output = $output +  "----------`r`n"
+    $output = $output +  "Username: " + $_.Name +  "`r`n"
+    $output = $output +  "Groups:   "  + $groups +  "`r`n"
 }
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Processes                                       "
-write-host "-------------------------------------------------------------------------------------------------"
-Get-WmiObject win32_process | Select-Object Name,ProcessID,@{n='Owner';e={$_.GetOwner().User}},CommandLine | sort name | format-table -wrap -autosize 
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Files with Full Control and Modify Access                                   "
-write-host "-------------------------------------------------------------------------------------------------"
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Processes`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  ((Get-WmiObject win32_process | Select-Object Name,ProcessID,@{n='Owner';e={$_.GetOwner().User}},CommandLine | sort name | format-table -wrap -autosize | out-string) + "`r`n")
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Files with Full Control and Modify Access`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
 $files = get-childitem C:\
 foreach ($file in $files){
     try {
-        get-childitem "C:\$file" -include *.ps1,*.bat,*.com,*.vbs,*.txt,*.html,*.conf,*.rdp,.*inf,*.ini -recurse -EA SilentlyContinue | get-acl -EA SilentlyContinue | select path -expand access | 
+        $output = $output +  (get-childitem "C:\$file" -include *.ps1,*.bat,*.com,*.vbs,*.txt,*.html,*.conf,*.rdp,.*inf,*.ini -recurse -EA SilentlyContinue | get-acl -EA SilentlyContinue | select path -expand access | 
         where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|EVERYONE|CREATOR OWNER|NT SERVICE"} | where {$_.filesystemrights -match "FullControl|Modify"} | 
-        ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096
+        ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096)
         }
     catch {
-        write "Failed to read more files"
+        $output = $output +   "Failed to read more files`r`n"
     }
     }
-  
- 
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "				   Folders with Full Control and Modify Access                                       "
-write-host "-------------------------------------------------------------------------------------------------"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Folders with Full Control and Modify Access`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
 $folders = get-childitem C:\
 foreach ($folder in $folders){
     try {
-        Get-ChildItem -Recurse "C:\$folder" -EA SilentlyContinue | ?{ $_.PSIsContainer} | get-acl  | select path -expand access |  
+        $output = $output +  (Get-ChildItem -Recurse "C:\$folder" -EA SilentlyContinue | ?{ $_.PSIsContainer} | get-acl  | select path -expand access |  
         where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|CREATOR OWNER|NT SERVICE"}  | where {$_.filesystemrights -match "FullControl|Modify"} | 
-        select path,filesystemrights,IdentityReference |  ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096
+        select path,filesystemrights,IdentityReference |  ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096)
          }
     catch {
-        write "Failed to read more folders"
+        $output = $output +  "Failed to read more folders`r`n"
     }
     }
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Mapped Drives                                    "
-write-host "-------------------------------------------------------------------------------------------------"
-Get-WmiObject -Class Win32_LogicalDisk | select DeviceID, VolumeName | ft -hidetableheaders -autosize | out-string -Width 4096
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Unquoted Service Path                                   "
-write-host "-------------------------------------------------------------------------------------------------"
-cmd /c  'wmic service get name,displayname,pathname,startmode |findstr /i "auto" |findstr /i /v "c:\windows\\" |findstr /i /v """'
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Recent Documents                                  "
-write-host "-------------------------------------------------------------------------------------------------"
-get-childitem "C:\Users\$env:username\AppData\Roaming\Microsoft\Windows\Recent" | select Name | ft -hidetableheaders | out-string 
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "				   System Install Files with Passwords                                      "
-write-host "-------------------------------------------------------------------------------------------------" 
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Mapped Drives`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  ((Get-WmiObject -Class Win32_LogicalDisk | select DeviceID, VolumeName | ft -hidetableheaders -autosize | out-string -Width 4096) + "`r`n")
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Unquoted Service Paths`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  (cmd /c  'wmic service get name,displayname,pathname,startmode |findstr /i "auto" |findstr /i /v "c:\windows\\" |findstr /i /v """')
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Recent Documents`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  (get-childitem "C:\Users\$env:username\AppData\Roaming\Microsoft\Windows\Recent" | select Name | ft -hidetableheaders | out-string )
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " System Files with Passwords`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
 $files = ("unattended.xml", "sysprep.xml", "autounattended.xml","unattended.inf", "sysprep.inf", "autounattended.inf","unattended.txt", "sysprep.txt", "autounattended.txt")
-get-childitem C:\ -recurse -include $files -EA SilentlyContinue  | Select-String -pattern "<Value>" 
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "				   AlwaysInstallElevated RegistryKey                                      "
-write-host "-------------------------------------------------------------------------------------------------" 
+$output = $output +  (get-childitem C:\ -recurse -include $files -EA SilentlyContinue  | Select-String -pattern "<Value>" | out-string)
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " AlwaysInstalledElevated Registry Key`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
 $HKLM = test-path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
 $HKCU = test-path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer"
 if ($HKLM -eq $True) {
-    write "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer Key Exists!"
+    $output = $output +  "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer Key Exists!"
 }
 if ($HKCU -eq $True) {
-    write "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer Key Exists!"
+    $output = $output +  "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer Key Exists!"
 }
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Stored Credentials                                       "
-write-host "-------------------------------------------------------------------------------------------------"
-cmdkey /list
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Installed Applications                                  "
-write-host "-------------------------------------------------------------------------------------------------"
-get-wmiobject -Class win32_product | select Name, Version, Caption | ft -hidetableheaders -autosize| out-string -Width 4096
-
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "					Installed Pacthes                                  "
-write-host "-------------------------------------------------------------------------------------------------"
-Get-Wmiobject -class Win32_QuickFixEngineering -namespace "root\cimv2" | select HotFixID, InstalledOn| ft -autosize | out-string 
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "				   Programs Folders                                      "
-write-host "-------------------------------------------------------------------------------------------------" 
-$prog_folders = get-childitem "C:\Program Files"  -EA SilentlyContinue  | select Name
-$prog_folders += get-childitem "C:\Program Files (x86)"  -EA SilentlyContinue  | select Name
-write $prog_folders | ft -hidetableheaders -autosize| out-string
-
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "				   MuiCache Files                                       "
-write-host "-------------------------------------------------------------------------------------------------"
-get-childitem "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\" | foreach {
-   $CurrentKey = (Get-ItemProperty -Path $_.PsPath)
-   if ($CurrentKey -match "\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b") {
-      $CurrentKey | out-string -Width 4096
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Stored Credentials`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output + (cmdkey /list | out-string)
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Installed Programs`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  (get-wmiobject -Class win32_product | select Name, Version, Caption | ft -hidetableheaders -autosize| out-string -Width 4096)
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Installed Patches`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  (Get-Wmiobject -class Win32_QuickFixEngineering -namespace "root\cimv2" | select HotFixID, InstalledOn| ft -autosize | out-string )
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Program Folder`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output + (get-childitem "C:\Program Files"  -EA SilentlyContinue  | select Name  | ft -hidetableheaders -autosize| out-string)
+$output = $output + (get-childitem "C:\Program Files (x86)"  -EA SilentlyContinue  | select Name  | ft -hidetableheaders -autosize| out-string)
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " MUICache Files`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+get-childitem "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\" |
+foreach { $CurrentKey = (Get-ItemProperty -Path $_.PsPath)
+   if ($CurrentKey -match "C:\\") {
+      $output = $output + ($_.Property -join "`r`n")
    }
 }
+$output = $output +  "`r`n"
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Scheduled Tasks`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  "Current System Time: " + (get-date)
+$output = $output + (schtasks /query /FO CSV /v | convertfrom-csv | where { $_.TaskName -ne "TaskName" } | select "TaskName","Run As User", "Task to Run"  | fl | out-string)
+$output
+# Invoke-Expression .\testing.ps1
 
-write-host "`n-------------------------------------------------------------------------------------------------"
-write-host "				  Scheduled Tasks                                "
-write-host "-------------------------------------------------------------------------------------------------"
-write-host "Current System Time: " $date.ToShortTimeString()
-schtasks /query /FO CSV /v | convertfrom-csv | where { $_.TaskName -ne "TaskName" } | select "TaskName","Run As User", "Task to Run"  | fl
+
