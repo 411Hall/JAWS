@@ -1,3 +1,4 @@
+write-output "`nRunning J.A.W.S. Enumeration"
 $output = "" 
 $output = $output +  "############################################################`r`n"
 $output = $output +  "##     J.A.W.S. (Just Another Windows Enum Script)        ##`r`n"
@@ -14,10 +15,23 @@ $output = $output +  "Current User: " + (($env:username) + "`r`n")
 $output = $output +  "Current Time\Date: " + (get-date)
 $output = $output +  "`r`n"
 $output = $output +  "`r`n"
+write-output "	- Gathering User Information"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Users`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$adsi = [ADSI]"WinNT://$env:COMPUTERNAME"
+$adsi.Children | where {$_.SchemaClassName -eq 'user'} | Foreach-Object {
+    $groups = $_.Groups() | Foreach-Object {$_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)}
+    $output = $output +  "----------`r`n"
+    $output = $output +  "Username: " + $_.Name +  "`r`n"
+    $output = $output +  "Groups:   "  + $groups +  "`r`n"
+}
+$output = $output +  "`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  " Network Information`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output + (Get-WmiObject Win32_NetworkAdapterConfiguration -filter 'IPEnabled= True' | select IpAddress, DNSDomain, DefaultIPGateway | ft -hidetableheaders -autosize | out-string -Width 4096)
+$output = $output + (ipconfig | out-string)
+$output = $output +  "`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  " Arp`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
@@ -63,21 +77,45 @@ $output = $output +  "----------------------------------------------------------
 $output = $output +  "`r`n"
 $output = $output + ((get-content $env:windir\System32\drivers\etc\hosts | out-string) + "`r`n")
 $output = $output +  "`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  " Users`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$adsi = [ADSI]"WinNT://$env:COMPUTERNAME"
-$adsi.Children | where {$_.SchemaClassName -eq 'user'} | Foreach-Object {
-    $groups = $_.Groups() | Foreach-Object {$_.GetType().InvokeMember("Name", 'GetProperty', $null, $_, $null)}
-    $output = $output +  "----------`r`n"
-    $output = $output +  "Username: " + $_.Name +  "`r`n"
-    $output = $output +  "Groups:   "  + $groups +  "`r`n"
-}
-$output = $output +  "`r`n"
+write-output "	- Gathering Processes, Services and Scheduled Tasks"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  " Processes`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  ((Get-WmiObject win32_process | Select-Object Name,ProcessID,@{n='Owner';e={$_.GetOwner().User}},CommandLine | sort name | format-table -wrap -autosize | out-string) + "`r`n")
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Scheduled Tasks`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  "Current System Time: " + (get-date)
+$output = $output + (schtasks /query /FO CSV /v | convertfrom-csv | where { $_.TaskName -ne "TaskName" } | select "TaskName","Run As User", "Task to Run"  | fl | out-string)
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Services`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output + (get-service | Select Name,DisplayName,Status | sort status | ft -autosize| out-string)
+$output = $output +  "`r`n"
+write-output "	- Gathering Installed Software"
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Installed Programs`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  (get-wmiobject -Class win32_product | select Name, Version, Caption | ft -hidetableheaders -autosize| out-string -Width 4096)
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Installed Patches`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  (Get-Wmiobject -class Win32_QuickFixEngineering -namespace "root\cimv2" | select HotFixID, InstalledOn| ft -autosize | out-string )
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " Program Folders`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output + "`n`rC:\Program Files`r`n"
+$output = $output +  "-------------"
+$output = $output + (get-childitem "C:\Program Files"  -EA SilentlyContinue  | select Name  | ft -hidetableheaders -autosize| out-string)
+$output = $output + "C:\Program Files (x86)`r`n"
+$output = $output +  "-------------------"
+$output = $output + (get-childitem "C:\Program Files (x86)"  -EA SilentlyContinue  | select Name  | ft -hidetableheaders -autosize| out-string)
+$output = $output +  "`r`n"
+write-output "	- Gathering File System Information"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  " Files with Full Control and Modify Access`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
@@ -92,6 +130,7 @@ foreach ($file in $files){
         $output = $output +   "Failed to read more files`r`n"
     }
     }
+
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  " Folders with Full Control and Modify Access`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
@@ -110,7 +149,7 @@ $output = $output +  "`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  " Mapped Drives`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  ((Get-WmiObject -Class Win32_LogicalDisk | select DeviceID, VolumeName | ft -hidetableheaders -autosize | out-string -Width 4096) + "`r`n")
+$output = $output +  (Get-WmiObject -Class Win32_LogicalDisk | select DeviceID, VolumeName | ft -hidetableheaders -autosize | out-string -Width 4096)
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  " Unquoted Service Paths`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
@@ -121,6 +160,23 @@ $output = $output +  " Recent Documents`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  (get-childitem "C:\Users\$env:username\AppData\Roaming\Microsoft\Windows\Recent" | select Name | ft -hidetableheaders | out-string )
 $output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " 10 Last Modified Files in C:\User`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output + (Get-ChildItem 'C:\Users' -recurse -EA SilentlyContinue | Sort {$_.LastWriteTime} | select -last 10 | ft -hidetableheaders | out-string)
+$output = $output +  "`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+$output = $output +  " MUICache Files`r`n"
+$output = $output +  "-----------------------------------------------------------`r`n"
+get-childitem "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\" |
+foreach { $CurrentKey = (Get-ItemProperty -Path $_.PsPath)
+   if ($CurrentKey -match "C:\\") {
+      $output = $output + ($_.Property -join "`r`n")
+   }
+}
+$output = $output +  "`r`n"
+$output = $output +  "`r`n"
+write-output "	- Looking for Simple Priv Esc Methods"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output +  " System Files with Passwords`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
@@ -144,39 +200,5 @@ $output = $output +  " Stored Credentials`r`n"
 $output = $output +  "-----------------------------------------------------------`r`n"
 $output = $output + (cmdkey /list | out-string)
 $output = $output +  "`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  " Installed Programs`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  (get-wmiobject -Class win32_product | select Name, Version, Caption | ft -hidetableheaders -autosize| out-string -Width 4096)
-$output = $output +  "`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  " Installed Patches`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  (Get-Wmiobject -class Win32_QuickFixEngineering -namespace "root\cimv2" | select HotFixID, InstalledOn| ft -autosize | out-string )
-$output = $output +  "`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  " Program Folder`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output + (get-childitem "C:\Program Files"  -EA SilentlyContinue  | select Name  | ft -hidetableheaders -autosize| out-string)
-$output = $output + (get-childitem "C:\Program Files (x86)"  -EA SilentlyContinue  | select Name  | ft -hidetableheaders -autosize| out-string)
-$output = $output +  "`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  " MUICache Files`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-get-childitem "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\" |
-foreach { $CurrentKey = (Get-ItemProperty -Path $_.PsPath)
-   if ($CurrentKey -match "C:\\") {
-      $output = $output + ($_.Property -join "`r`n")
-   }
-}
-$output = $output +  "`r`n"
-$output = $output +  "`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  " Scheduled Tasks`r`n"
-$output = $output +  "-----------------------------------------------------------`r`n"
-$output = $output +  "Current System Time: " + (get-date)
-$output = $output + (schtasks /query /FO CSV /v | convertfrom-csv | where { $_.TaskName -ne "TaskName" } | select "TaskName","Run As User", "Task to Run"  | fl | out-string)
+clear-host
 $output
-# Invoke-Expression .\testing.ps1
-
-
