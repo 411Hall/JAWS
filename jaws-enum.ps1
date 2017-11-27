@@ -229,6 +229,11 @@ function JAWS-ENUM {
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output + (cmdkey /list | out-string)
     $output = $output +  "`r`n"
+    $output = $output +  "`r`n"
+    $output = $output +  "-----------------------------------------------------------`r`n"
+    $output = $output +  " Reading SAM File Permissions `r`n"
+    $output = $output +  "-----------------------------------------------------------`r`n"
+    $output = $output + (get-acl C:\Windows\System32\config\SAM | fl | Out-String)
     
     if ($OutputFilename.length -gt 0)
        {
