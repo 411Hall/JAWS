@@ -112,7 +112,7 @@ function JAWS-ENUM {
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " Services`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
-    $output = $output + (get-service | Select Name,DisplayName,Status | sort status | ft -autosize| out-string)
+    $output = $output + (get-service | Select Name,DisplayName,Status | sort status | Format-Table -Property * -AutoSize | Out-String -Width 4096)
     $output = $output +  "`r`n"
     write-output "	- Gathering Installed Software"
     $output = $output +  "`r`n"
@@ -148,7 +148,7 @@ function JAWS-ENUM {
             ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096)
             }
         catch {
-            $output = $output +   "Failed to read more files`r`n"
+            $output = $output +   "`nFailed to read more files`r`n"
         }
         }
 
@@ -163,7 +163,7 @@ function JAWS-ENUM {
             select path,filesystemrights,IdentityReference |  ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096)
              }
         catch {
-            $output = $output +  "Failed to read more folders`r`n"
+            $output = $output +  "`nFailed to read more folders`r`n"
         }
         }
     $output = $output +  "`r`n"
@@ -179,7 +179,7 @@ function JAWS-ENUM {
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " Recent Documents`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
-    $output = $output +  (get-childitem "C:\Users\$env:username\AppData\Roaming\Microsoft\Windows\Recent" | select Name | ft -hidetableheaders | out-string )
+    $output = $output +  (get-childitem "C:\Users\$env:username\AppData\Roaming\Microsoft\Windows\Recent"  -EA SilentlyContinue | select Name | ft -hidetableheaders | out-string )
     $output = $output +  "`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " 10 Last Modified Files in C:\User`r`n"
@@ -189,7 +189,7 @@ function JAWS-ENUM {
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " MUICache Files`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
-    get-childitem "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\" |
+    get-childitem "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\" -EA SilentlyContinue |
     foreach { $CurrentKey = (Get-ItemProperty -Path $_.PsPath)
        if ($CurrentKey -match "C:\\") {
           $output = $output + ($_.Property -join "`r`n")
@@ -232,7 +232,7 @@ function JAWS-ENUM {
     
     if ($OutputFilename.length -gt 0)
        {
-        $output | Out-File -FilePath $OutputFileName
+        $output | Out-File -FilePath $OutputFileName -encoding utf8
         }
     else
         {
