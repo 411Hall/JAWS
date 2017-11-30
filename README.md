@@ -43,9 +43,6 @@ PS C:\temp> .\jaws-enum.ps1 -OutputFileName Jaws-Enum.txt
 
 
 ## To Do
-  - Add file search for common strings (password, keys etc.)
-  - Add last 25 modified files
   - Add full directory listing with user defined depth
-  - Add CMD line switches
   - Read SAM file permissions
   - Improve output
