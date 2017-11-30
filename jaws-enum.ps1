@@ -182,9 +182,14 @@ function JAWS-ENUM {
     $output = $output +  (get-childitem "C:\Users\$env:username\AppData\Roaming\Microsoft\Windows\Recent"  -EA SilentlyContinue | select Name | ft -hidetableheaders | out-string )
     $output = $output +  "`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
+    $output = $output +  " Potentially Interesting Files in Users Directory `r`n"
+    $output = $output +  "-----------------------------------------------------------`r`n"
+    $output = $output +  (get-childitem "C:\Users\" -recurse -Include *.zip,*.rar,*.7z,*.gz,*.conf,*.rdp,*.kdbx,*.crt,*.pem,*.ppk,*.txt,*.xml,*.vnc.*.ini -EA SilentlyContinue | %{$_.FullName } | out-string)
+    $output = $output +  "`r`n"
+    $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " 10 Last Modified Files in C:\User`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
-    $output = $output + (Get-ChildItem 'C:\Users' -recurse -EA SilentlyContinue | Sort {$_.LastWriteTime} | select -last 10 | ft -hidetableheaders | out-string)
+    $output = $output + (Get-ChildItem 'C:\Users' -recurse -EA SilentlyContinue | Sort {$_.LastWriteTime} |  %{$_.FullName } | select -last 10 | ft -hidetableheaders | out-string)
     $output = $output +  "`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " MUICache Files`r`n"
