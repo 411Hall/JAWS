@@ -24,6 +24,7 @@ PS C:\temp> .\jaws-enum.ps1 -OutputFileName Jaws-Enum.txt
   - Running Processes
   - Files and Folders with Full Control or Modify Access
   - Mapped Drives
+  - Potentially Interesting Files
   - Unquoted Service Paths
   - Recent Documents
   - System Install Files 
