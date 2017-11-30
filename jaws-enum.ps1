@@ -184,7 +184,7 @@ function JAWS-ENUM {
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " Potentially Interesting Files in Users Directory `r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
-    $output = $output +  (get-childitem "C:\Users\" -recurse -Include *.zip,*.rar,*.7z,*.gz,*.conf,*.rdp,*.kdbx,*.crt,*.pem,*.ppk,*.txt,*.xml,*.vnc.*.ini -EA SilentlyContinue | %{$_.FullName } | out-string)
+    $output = $output +  (get-childitem "C:\Users\" -recurse -Include *.zip,*.rar,*.7z,*.gz,*.conf,*.rdp,*.kdbx,*.crt,*.pem,*.ppk,*.txt,*.xml,*.vnc.*.ini,*.vbs,*.bat,*.ps1,*.cmd -EA SilentlyContinue | %{$_.FullName } | out-string)
     $output = $output +  "`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " 10 Last Modified Files in C:\User`r`n"
