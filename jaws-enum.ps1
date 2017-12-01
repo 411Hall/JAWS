@@ -238,14 +238,17 @@ function JAWS-ENUM {
     $output = $output +  " Checking for AutoAdminLogon `r`n"
     $output = $output + "-----------------------------------------------------------`r`n"
     $Winlogon = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-    if ((get-itemproperty -path $Winlogon -Name AutoAdminLogon).AutoAdminLogon -eq 1) 
+    if (get-itemproperty -path $Winlogon -Name AutoAdminLogon -ErrorAction SilentlyContinue) 
         {
-        $Usern = (get-itemproperty -path $Winlogon -Name DefaultUserName).DefaultUsername
-        $output = $output + "The default username is $Usern `r`n"
-        $Passw = (get-itemproperty -path $Winlogon -Name DefaultPassword).DefaultPassword
-        $output = $output + "The default password is $Passw `r`n"
-        $DefaultDomainName = (get-itemproperty -path $Winlogon -Name DefaultDomainName).DefaultDomainName
-        $output = $output + "The default domainname is $DefaultDomainName `r`n"
+        if ((get-itemproperty -path $Winlogon -Name AutoAdminLogon).AutoAdminLogon -eq 1) 
+            {
+            $Username = (get-itemproperty -path $Winlogon -Name DefaultUserName).DefaultUsername
+            $output = $output + "The default username is $Username `r`n"
+            $Password = (get-itemproperty -path $Winlogon -Name DefaultPassword).DefaultPassword
+            $output = $output + "The default password is $Password `r`n"
+            $DefaultDomainName = (get-itemproperty -path $Winlogon -Name DefaultDomainName).DefaultDomainName
+            $output = $output + "The default domainname is $DefaultDomainName `r`n"
+            }
         }
     $output = $output +  "`r`n"
     if ($OutputFilename.length -gt 0)
