@@ -238,7 +238,7 @@ function JAWS-ENUM {
     $output = $output +  " Checking for AutoAdminLogon `r`n"
     $output = $output + "-----------------------------------------------------------`r`n"
     $Winlogon = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-    if ((get-itemproperty -path $Winlogon -Name AutoAdminLogon).AutoAdminLogon -eq 0) 
+    if ((get-itemproperty -path $Winlogon -Name AutoAdminLogon).AutoAdminLogon -eq 1) 
         {
         $Usern = (get-itemproperty -path $Winlogon -Name DefaultUserName).DefaultUsername
         $output = $output + "The default username is $Usern `r`n"
