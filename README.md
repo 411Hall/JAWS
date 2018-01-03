@@ -15,7 +15,7 @@ CMD C:\temp> powershell.exe -ExecutionPolicy Bypass -File .\jaws-enum.ps1
 ```
 **Run from within PS Shell and write out to file.**
 ```
-PS C:\temp> .\jaws-enum.ps1 -OutputFileName Jaws-Enum.txt
+PS C:\temp> .\jaws-enum.ps1 | Out-File Jaws-Enum.txt
 ```
 
 ## Current Features
