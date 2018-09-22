@@ -74,7 +74,7 @@ function JAWS-ENUM {
     if ($FireProfile.FirewallEnabled -eq $False) {
         $output += ("Firewall is Disabled" + "`r`n")
         } else {
-        $output += ("Firwall is Enabled" + "`r`n")
+        $output += ("Firewall is Enabled" + "`r`n")
         }
     $output += "`r`n"
     $output += "-----------------------------------------------------------`r`n"
