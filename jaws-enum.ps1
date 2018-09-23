@@ -210,6 +210,17 @@ function JAWS-ENUM {
     $output += (get-childitem C:\ -recurse -include $files -EA SilentlyContinue  | Select-String -pattern "<Value>" | out-string)
     $output += "`r`n"
     $output += "-----------------------------------------------------------`r`n"
+    $output += " Security Accounts Manager (SAM)`r`n"
+    $output += "-----------------------------------------------------------`r`n "
+    $output += ("$env:windir\System32\Config\sam", "$env:windir\System32\config\RegBack\SAM", "$env:windir\repair\sam",
+                "$env:windir\System32\Config\SYSTEM","$env:windir\System32\Config\system.sav", "$env:windir\System32\config\RegBack\SYSTEM", "$env:windir\repair\SYSTEM") |
+            ForEach-Object { $_+ 
+                ((Get-Acl $_ -EA SilentlyContinue).Access |
+                Where-Object {$_.IdentityReference -ne "NT AUTHORITY\SYSTEM"} |
+                Format-List -Property IdentityReference, FileSystemRights |
+                Out-String)}
+    $output += "`r`n"
+    $output += "-----------------------------------------------------------`r`n"
     $output += " AlwaysInstalledElevated Registry Key`r`n"
     $output += "-----------------------------------------------------------`r`n"
     $HKLM = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
