@@ -220,6 +220,7 @@ function JAWS-ENUM {
                 Format-List -Property IdentityReference, FileSystemRights |
                 Out-String)}
     $output += "`r`n"
+    $output += "`r`n"
     $output += "-----------------------------------------------------------`r`n"
     $output += " AlwaysInstalledElevated Registry Key`r`n"
     $output += "-----------------------------------------------------------`r`n"
