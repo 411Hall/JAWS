@@ -267,12 +267,13 @@ if ($OutputFilename.length -gt 0)
         Try 
             { 
                 [io.file]::OpenWrite($OutputFilename).close()  
-                JAWS-ENUM
             }
         Catch 
             { 
                 Write-Warning "`nUnable to write to output file $OutputFilename, Check path and permissions" 
+                Break
             }
+        JAWS-ENUM
     } 
 else 
     {
