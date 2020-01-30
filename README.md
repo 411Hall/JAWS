@@ -27,7 +27,7 @@ PS C:\temp> .\jaws-enum.ps1 -OutputFileName Jaws-Enum.txt
   - Potentially Interesting Files
   - Unquoted Service Paths
   - Recent Documents
-  - System Install Files 
+  - System Install Files
   - AlwaysInstallElevated Registry Key Check
   - Stored Credentials
   - Installed Applications
@@ -39,11 +39,11 @@ PS C:\temp> .\jaws-enum.ps1 -OutputFileName Jaws-Enum.txt
 
 - Output for firewall rules can sometimes be clipped.
 - When running from within a shell the script doesnt always tell you its finished.
-- When running within some PowerShell reverse shells the running menu isnt shown. 
+- When running within some PowerShell reverse shells the running menu isnt shown.
 
 
 
 ## To Do
   - Add full directory listing with user defined depth
-  - Read SAM file permissions
+  - ~~Read SAM file permissions~~
   - Improve output
