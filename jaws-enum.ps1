@@ -140,11 +140,20 @@ function JAWS-ENUM {
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " Files with Full Control and Modify Access`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
+    Function Get-Identity-Pattern($sids){
+    $identities = @()
+        foreach ($sid in $sids) {
+            $SIDObj = New-Object System.Security.Principal.SecurityIdentifier($sid)
+            $identities += $SIDObj.Translate([System.Security.Principal.NTAccount]).Value.Split("\")[0]
+        }
+        return $identities -Join "|" 
+    }
     $files = get-childitem C:\
     foreach ($file in $files){
         try {
+            # Exclude BUILTIN|NT AUTHORITY|EVERYONE|CREATOR OWNER|NT SERVICE
             $output = $output +  (get-childitem "C:\$file" -include *.ps1,*.bat,*.com,*.vbs,*.txt,*.html,*.conf,*.rdp,.*inf,*.ini -recurse -EA SilentlyContinue | get-acl -EA SilentlyContinue | select path -expand access | 
-            where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|EVERYONE|CREATOR OWNER|NT SERVICE"} | where {$_.filesystemrights -match "FullControl|Modify"} | 
+            where {$_.identityreference -notmatch $(Get-Identity-Pattern("S-1-5-32-544","S-1-5-18","S-1-1-0","S-1-3-0","S-1-5-80-0"))} | where {$_.filesystemrights -match "FullControl|Modify"} | 
             ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096)
             }
         catch {
@@ -158,8 +167,9 @@ function JAWS-ENUM {
     $folders = get-childitem C:\
     foreach ($folder in $folders){
         try {
+            # Exclude BUILTIN|NT AUTHORITY|CREATOR OWNER|NT SERVICE
             $output = $output +  (Get-ChildItem -Recurse "C:\$folder" -EA SilentlyContinue | ?{ $_.PSIsContainer} | get-acl  | select path -expand access |  
-            where {$_.identityreference -notmatch "BUILTIN|NT AUTHORITY|CREATOR OWNER|NT SERVICE"}  | where {$_.filesystemrights -match "FullControl|Modify"} | 
+            where {$_.identityreference -notmatch $(Get-Identity-Pattern("S-1-5-32-544","S-1-5-18","S-1-3-0","S-1-5-80-0"))}  | where {$_.filesystemrights -match "FullControl|Modify"} | 
             select path,filesystemrights,IdentityReference |  ft @{Label="";Expression={Convert-Path $_.Path}}  -hidetableheaders -autosize | out-string -Width 4096)
              }
         catch {
