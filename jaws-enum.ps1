@@ -107,7 +107,7 @@ function JAWS-ENUM {
     $output = $output +  " Scheduled Tasks`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  "Current System Time: " + (get-date)
-    $output = $output + (schtasks /query /FO CSV /v | convertfrom-csv | where { $_.TaskName -ne "TaskName" } | select "TaskName","Run As User", "Task to Run"  | fl | out-string)
+    $output = $output +  (Get-ScheduledTask | select "TaskName", @{Name="Run As User"; Expression={$_.Principal.UserId}}, @{Name="Task to Run"; Expression={$_.Actions.Execute}} | fl | out-string)
     $output = $output +  "`r`n"
     $output = $output +  "-----------------------------------------------------------`r`n"
     $output = $output +  " Services`r`n"
